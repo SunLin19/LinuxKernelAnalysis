@@ -1,22 +1,22 @@
-##分析 Linux 中断处理过程
+## 分析 Linux 中断处理过程
 
 在上一周的实验课程中，我们分析了 [Linux 内核系统调用过程](http://www.jianshu.com/p/0e25bee35c66)，理解了中断的概念和中断上下文，掌握了系统调用的原理，今天，我们继续以 Linux 内核 2 号系统调用 fork 函数为例，更加深入的分析系统调用过程。
 
-###1.增加 Menu 内核命令行
+### 1.增加 Menu 内核命令行
 在这里，我们把上一次实验的 `fork` 函数以命令行的形式写入内核，在这里我就不赘述操作步骤了，之前的实验有详细的操作流程。  
 
 ![](http://upload-images.jianshu.io/upload_images/1627862-00d9a712d8b4ab0c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 这就是我们将 `fork` 函数写入 `Menu` 系统内核后的效果，通过命令行，实现了操作系统调用过程。
 
-###2.GDB 追踪内核调用 sys_fork
+### 2.GDB 追踪内核调用 sys_fork
 通过查询操作系统内核调用函数 API，我们知道 `fork` 函数的系统调用是 sys_fork，下面我们就通过 `GDB` 来追踪 `sys_fork` 的调用过程。同样，这里我也不再赘述操作过程了，之前的实验都有涉及。  
 
 ![](http://upload-images.jianshu.io/upload_images/1627862-3b4351a25a059d49.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)  
 
 由上图可知，`sys_fork` 在底层调用的是 `do_fork` 函数。这里需要注意一下，`GDB` 支持在 `system_call` 处设置断点，但却无法让程序停留在这个地方，因此，我们只能暂停在这里了，转向分析源码。
 
-###3.分析内核调用汇编源码
+### 3.分析内核调用汇编源码
 
 ```
 ENTRY(system_call)
@@ -56,7 +56,7 @@ irq_return:
 
 ![](http://upload-images.jianshu.io/upload_images/1627862-049ddde62865145a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-###4.总结
+### 4.总结
 本实验通过分析 Linux 内核系统调用源码，深入剖析了系统调用的全过程。通过 `int 0x80` 中断跳转到系统调用处理程序 `system_call` 函数处，执行相应的例程。
 
 但是，由于是代表的是用户进程，所以这个执行过程并不属于中断上下文，而是进程上下文。因此，系统调用执行过程中，可以访问用户进程的许多信息，也可以被更高优先级的进程抢占。

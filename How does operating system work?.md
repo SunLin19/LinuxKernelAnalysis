@@ -1,4 +1,4 @@
-##1.函数调用堆栈和中断
+## 1.函数调用堆栈和中断
 在上一节实验中我们已经明白了，存储程序计算机的运行原理，就是通过不断的取指执行存储在堆栈上 `CPU` 指令，而这些二进制指令一一对应于汇编函数指令。因此，对于操作系统，我们引入相应的函数调用堆栈机制。  
 
 我们都知道 `CPU` 的运算速度是极其快的，很多时候例如输入输出过程，如果没有系统中断，`CPU` 就只能等待外设输入输出完成后再工作，这样会造成了极大的资源浪费。因此，现代操作系统都引入了中断机制，`CPU` 会根据当前进程的执行情况，交替执行多个程序，提高运行效率。  
@@ -6,10 +6,10 @@
 在本次实验基于一个小小的时间片轮转多道程序 [mykernel](https://github.com/mengning/mykernel)，分析操作系统的函数调用堆栈和中断的实现过程。  
 
 
-##2.内核代码分析
+## 2.内核代码分析
 `mykernel` 程序有三个源文件，分别是 `mypcb.h`，`mymain.c` 和 `myinterrupt.c`，`mypcb.h` 头文件，定义了一些结构和函数。`mymain.c` 定义了多个进程启动和运行的函数。`myinerrupt.c` 定义了时间片和中断处理的函数。
 
-####2.1>我们先来看看 `mypcb.h` 头文件:
+#### 2.1>我们先来看看 `mypcb.h` 头文件:
 ```
 #define MAX_TASK_NUM 10 // max num of task in system
 #define KERNEL_STACK_SIZE 1024*8
@@ -49,7 +49,7 @@ void my_schedule(void);
 ```
 最后，定义了 `my_schedule` 任务调度函数。
 
-####2.2>再来分析 `mymain.c` 文件：
+#### 2.2>再来分析 `mymain.c` 文件：
 ```
 tPCB task[MAX_TASK_NUM];
 tPCB * my_current_task = NULL;
@@ -119,7 +119,7 @@ void my_process(void)
 ```
 `my_process` 函数很简单，就是建立一个循环不断运行进程，输出进程信息，同时，如果 `my_need_sched = 1`，就开始中断并切换进程。
 
-####2.3>最后分析 myinterrupt.c 文件：
+#### 2.3>最后分析 myinterrupt.c 文件：
 ```
 extern tPCB task[MAX_TASK_NUM];
 extern tPCB * my_current_task;
@@ -206,5 +206,5 @@ printk(KERN_NOTICE " time out!!!,but no more than 2 task,need not schedule\n");
 ```
 `my_schedule` 函数是这个内核的重点，首先初始化 `next` 和 `prev` 两个 `PCB` 结构体，然后判断如果任务 `state` 状态是可运行时，说明这个任务正在执行，保存 `ebp` 和 `esp`，并切换到下一个任务 `ip` 执行；如果任务 `state` 状态是不可运行时，说明这个任务没执行过，保存当前任务，开始执行新任务。
 
-###3.总结：
+### 3.总结：
 通过分析实验代码，我们学习了一个简单的时间片轮转多道操作系统内核，了解了操作系统的中断上下文和进程上下文切换。每个任务被分配一定的时间片执行，如果在时间片结束后任务仍在执行，CPU 将会剥夺它的执行权并分配给其他任务；如果任务在时间片结束前完成，CPU 则会立即进行切换，调度程序就是在维护一个就绪进程队列，当进程用完属于它的时间片后，在队列中重新按照优先级排序，这是最简单、最公平也最高效的一种方式。

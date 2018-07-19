@@ -1,6 +1,6 @@
-##分析 Linux 操作系统如何装载链接并执行程序
+## 分析 Linux 操作系统如何装载链接并执行程序
 
-###1.理论基础
+### 1.理论基础
 我们在本科刚开始学习 `C` 语言的时候，老师们都会讲 `C` 语言程序的执行必须经历预处理、编译、汇编、链接、执行程序等过程。由于那时候教学大多使用 `VC6` 集成开发环境，所以对于上述过程并没有很清晰的概念。今天，我们就通过 `GDB` 来跟踪分析一个 `execve` 系统调用内核处理函数 `sys_execve`，深入理解 `Linux` 操作系统装载链接和运行可执行程序的过程。
 
 我们先以 `hello_world.c` 程序为例，搞清楚可执行程序是如何生成的：
@@ -32,7 +32,7 @@ int main(void)
 
 ![](http://upload-images.jianshu.io/upload_images/1627862-5b61d2cb1f492d50.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-###2.ELF 文件格式
+### 2.ELF 文件格式
 `ELF` 格式：[可执行和可链接格式](http://en.wikipedia.org/wiki/Executable_and_Linkable_Format) (`Executable and Linkable Format`) 是一种用于二进制文件、可执行文件、目标代码、共享库和核心转储的标准文件格式。
 >可重定位文件，如：.o 文件，包含代码和数据，可以被链接成可执行文件或共享目标文件，静态链接库属于这一类。  
 >可执行文件，如：/bin/bash 文件，包含可直接执行的程序，没有扩展名。  
@@ -46,7 +46,7 @@ int main(void)
 
 ![](http://upload-images.jianshu.io/upload_images/1627862-3b2f80455bd8a193.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-###3.静态&动态链接
+### 3.静态&动态链接
 链接，是收集和组织程序所需的不同代码和数据的过程，以便程序能被装入内存并被执行。一般分为两步：1.空间与地址分配，2.符号解析与重定位。一般有两种类型，一是静态链接，二是动态链接。
 
 使用静态链接的好处是，依赖的动态链接库较少（这句话有点绕），对动态链接库的版本更新不会很敏感，具有较好的兼容性；不好地方主要是生成的程序比较大，占用资源多。使用动态链接的好处是生成的程序小，占用资源少。动态链接分为可执行程序装载时动态链接和运行时动态链接。
@@ -55,7 +55,7 @@ int main(void)
 
 ![](http://upload-images.jianshu.io/upload_images/1627862-4d8e3d6069c189bd.gif?imageMogr2/auto-orient/strip)
 
-###4.装载程序
+### 4.装载程序
 我们在 `sys_execve` 处设置断点开始追踪分析，如下图：
 
 ![](http://upload-images.jianshu.io/upload_images/1627862-2eb10c9fbce76279.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
@@ -157,5 +157,5 @@ static int load_elf_binary(struct linux_binprm *bprm)
 ```
 `load_elf_binary` 调用 `start_thread` 函数。修改 `int 0x80` 压入内核堆栈的 `EIP`，当 `load_elf_binary` 执行完毕，返回至 `do_execve` 再返回至 `sys_execve` 时，系统调用的返回地址，即 `EIP` 寄存器，已经被改写成了被装载的 `ELF` 程序的入口地址了。
 
-###5.总结
+### 5.总结
 `Linux` 系统通过用户态 `execve` 函数调用内核态 `sys_execve` 系统调用，负责将新的程序代码和数据替换到新的进程中，打开可执行文件，载入依赖的库文件，申请新的内存空间，最后执行 `start_thread` 函数设置 `new_ip` 和 `new_sp`，完成新进程的代码和数据替换，然后返回并执行新的进程代码。

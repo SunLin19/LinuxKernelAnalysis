@@ -1,16 +1,16 @@
-##分析 Linux 内核的启动过程
+## 分析 Linux 内核的启动过程
 
-###1.计算机的启动过程
+### 1.计算机的启动过程
 我们日常使用的计算机是怎么启动的，嗯，在我 9 岁那年第一次摸电脑的时候就有过这样的疑问。幸运的是，我现在找到了答案。今天就带着大家一起来分析分析计算机的启动和操作系统初始化的过程。
 
 对于常见的 `x86` 计算机来说，通电后的第一个步骤就是启动一组固化到主板 `ROM` 芯片上的基本输入输出程序 `BIOS`，`BIOS` 在加电自检确认硬件完好无损后，就会开始寻找操作系统引导程序 `BootLoader`，这个引导一般位于硬盘的第一个扇区，`BootLoader` 就是负责操作系统初始化的程序了，先是哔哔哔运行一段汇编代码，然后，再跳转到 C 语言编写的 `start_kernel`，最后，开启死循环，运行操作系统。
 
-###2.启动内核
+### 2.启动内核
 本次实验基于一个小型的操作系统内核 `MenuOS`，现在，让我们先来启动它看看：  
 
 ![](http://upload-images.jianshu.io/upload_images/1627862-b7b5544f1989872f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-###3.GDB 调试内核
+### 3.GDB 调试内核
 现在，我们再来使用断点调试工具，跟踪分析内核启动的过程：  
 
 ![](http://upload-images.jianshu.io/upload_images/1627862-4a1454c0c647b041.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
@@ -21,7 +21,7 @@
 
 ![](http://upload-images.jianshu.io/upload_images/1627862-013009435f4a895f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-###4.重要函数分析
+### 4.重要函数分析
 首先，我们来看看 `trap_init` 函数：  
 
 ![](http://upload-images.jianshu.io/upload_images/1627862-0634f94166056a60.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
